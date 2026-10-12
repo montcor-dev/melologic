@@ -1,3 +1,41 @@
 from django.db import models
 
-# Create your models here.
+class Person(models.Model):
+    title = models.CharField(max_length=20, blank=True, null=True)
+    greeting_formula = models.CharField(max_length=20, blank=True, null=True)
+    use_tu = models.BooleanField(blank=True, null=True)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    address = models.CharField(max_length=50, blank=True, null=True)
+    postal_code = models.CharField(max_length=10, blank=True, null=True)
+    city = models.CharField(max_length=30, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    phone_2 = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    birth_date = models.DateField(blank=True, null=True)
+    about_me = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Set once, on create
+    updated_at = models.DateTimeField(auto_now=True)       # Updated on every save
+
+class Student(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.PROTECT)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    level = models.CharField(max_length=20, blank=True, null=True)
+    styles = models.CharField(max_length=30, blank=True, null=True)
+    instruments = models.CharField(max_length=50, blank=True, null=True)
+    source = models.CharField(max_length=20, blank=True, null=True)
+    first_contact_date = models.DateField(blank=True, null=True)
+    enrollment_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Set once, on create
+    updated_at = models.DateTimeField(auto_now=True)       # Updated on every save
+
+class Teacher(models.Model):
+    person = models.ForeignKey(Person, on_delete=models.PROTECT)
+    styles = models.CharField(max_length=30, blank=True, null=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    instruments = models.CharField(max_length=50, blank=True, null=True)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Set once, on create
+    updated_at = models.DateTimeField(auto_now=True)       # Updated on every save
