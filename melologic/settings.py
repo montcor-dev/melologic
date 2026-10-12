@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'persons',
+    'interactions',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +127,10 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# Local settings (gitignored, contains sensitive data)
+try:
+    from .local_settings import *
+except ImportError:
+    pass
