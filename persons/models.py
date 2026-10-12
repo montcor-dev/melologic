@@ -17,6 +17,11 @@ class Person(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # Set once, on create
     updated_at = models.DateTimeField(auto_now=True)       # Updated on every save
 
+    def __str__(self):
+        """ Return name for admin and dropdowns (instead of ID). """
+        return f"{self.last_name} {self.first_name}"
+
+
 class Student(models.Model):
     person = models.ForeignKey(Person, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, blank=True, null=True)
@@ -30,6 +35,11 @@ class Student(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # Set once, on create
     updated_at = models.DateTimeField(auto_now=True)       # Updated on every save
 
+    def __str__(self):
+        """ Return student name with status for admin. """
+        return f"{self.person.last_name} {self.person.first_name} - {self.status}"
+
+
 class Teacher(models.Model):
     person = models.ForeignKey(Person, on_delete=models.PROTECT)
     styles = models.CharField(max_length=30, blank=True, null=True)
@@ -39,3 +49,7 @@ class Teacher(models.Model):
     end_date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)  # Set once, on create
     updated_at = models.DateTimeField(auto_now=True)       # Updated on every save
+
+    def __str__(self):
+        """ Return teacher name with status for admin. """
+        return f"{self.person.last_name} {self.person.first_name} - {self.status}"
