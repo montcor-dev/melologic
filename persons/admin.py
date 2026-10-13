@@ -11,9 +11,96 @@ class TeacherInline(admin.StackedInline):
     extra = 0
     max_num = 1
 
+class RoleFilter(admin.SimpleListFilter):
+    # custom filter to categorize persons by their role.
+
+    # --- Class attributes ---
+
+    title  = 'Role'
+    # title shown above the filter in the admin sidebar
+
+    parameter_name = 'role'
+    # url parameter name when filer is active
+
+
+    # --- Define filter choices ---
+
+    def lookups(self, request, model_admin):
+        """
+        returns the choices shown in the dropdown
+
+        Args:
+            - request: current http request
+            - model_admin: the admin class (PersonAdmin)
+
+        Returns:
+            List of tuples (internal_value, display_text)
+                - internal_value: what goes in the url (?role=student)
+                - display_text: text visible in dropdown        
+        """
+
+        return (
+            ('student', 'Student'),
+            ('teacher', 'Teacher'),
+            ('both', 'Both (Student & Teacher)'),
+            ('none', 'No role (general contact)'),
+        )
+
+    # --- Filter the database query ---
+
+    def queryset(self, request, queryset):
+        """
+        filters the database query based on selected choice
+
+        Django calls this method when a user clicks a filter option.
+
+        Args:
+            - request: current http request
+            - queryset: the current databse query (all Person records)
+
+        Returns:
+            A filtered queryset (subset of persos)
+        """
+
+        # self.value() returns the selected internal_value from lookups()
+        # Example: 'student', 'teacher', 'both', or 'none'
+
+        if self.value() == 'student':
+            return queryset.filter(
+                student__isnull=False
+            ).exclude(
+                teacher__isnull=False
+            )
+
+        elif self.value() == 'teacher':
+            return queryset.filter(
+                teacher__isnull=False
+            ).exclude(
+                student__isnull=False
+            )
+
+        elif self.value() == 'both':
+            return queryset.filter(
+                student__isnull=False,
+                teacher__isnull=False
+            )
+
+        elif self.value() == 'none':
+            return queryset.filter(
+                student__isnull=True,
+                teacher__isnull=True
+            )
+
+        # if no filter selected, return original queryset
+        return queryset
+
+
+
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
     list_display = ['full_name', 'email', 'birth_date']
+    search_fields = ['first_name', 'last_name', 'email']
+    list_filter = [RoleFilter, 'city']
     
     fieldsets = (
         ('Identity', {
