@@ -12,7 +12,7 @@ class TeacherInline(admin.StackedInline):
     max_num = 1
 
 class RoleFilter(admin.SimpleListFilter):
-    # custom filter to categorize persons by their role.
+    # custom filter to categorize persons by their role
 
     # --- Class attributes ---
 
@@ -94,6 +94,25 @@ class RoleFilter(admin.SimpleListFilter):
         # if no filter selected, return original queryset
         return queryset
 
+class TeacherFilter(admin.SimpleListFilter):
+    # custom filter to show only the students of a selected teacher
+
+    # --- Class attributes ---
+    title = 'Teacher'
+    parameter_name = 'teacher'
+
+    # --- Define filter choices ---
+
+    def lookups(self, request, model_admin):
+        teachers = Teacher.objects.all()
+        return [(t.id, f"{t.person.last_name} {t.person.first_name}") for t in teachers]
+
+    # -- Filter the database query ---
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(teacher_id=self.value())
+        return queryset
 
 
 @admin.register(Person)
@@ -141,6 +160,8 @@ class PersonAdmin(admin.ModelAdmin):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ['get_name', 'status', 'level', 'instruments']
+    search_fields = ['first_name', 'last_name', 'email']
+    list_filter = [TeacherFilter]
 
     def get_name(self, obj):
         """Return student's full name from related Person"""
