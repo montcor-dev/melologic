@@ -94,6 +94,7 @@ class RoleFilter(admin.SimpleListFilter):
         # if no filter selected, return original queryset
         return queryset
 
+
 class TeacherFilter(admin.SimpleListFilter):
     # custom filter to show only the students of a selected teacher
 
@@ -159,7 +160,7 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ['get_name', 'status', 'level', 'instruments']
+    list_display = ['get_name', 'teacher', 'status', 'level', 'instruments']
     search_fields = ['first_name', 'last_name', 'email']
     list_filter = [TeacherFilter]
 

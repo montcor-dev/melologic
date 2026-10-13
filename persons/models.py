@@ -24,6 +24,7 @@ class Person(models.Model):
 
 class Student(models.Model):
     person = models.ForeignKey(Person, on_delete=models.PROTECT)
+    teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, blank=True, related_name='students',)
     status = models.CharField(max_length=20, blank=True, null=True)
     level = models.CharField(max_length=20, blank=True, null=True)
     styles = models.CharField(max_length=30, blank=True, null=True)
