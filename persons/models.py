@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Person(models.Model):
     title = models.CharField(max_length=20, blank=True, null=True)
     greeting_formula = models.CharField(max_length=20, blank=True, null=True)
@@ -22,10 +23,30 @@ class Person(models.Model):
         return f"{self.last_name} {self.first_name}"
 
 
+class StudentStatus(models.TextChoices):
+    """
+    Status choices for Student model.
+    
+    These values represent the student lifecycle from initial contact
+    (prospect) through active enrollment (active) to former student (former).
+    The 'lost' status tracks prospects/students who discontinued.
+    """
+    PROSPECT = 'prospect', 'Prospect'
+    ACTIVE = 'active', 'Active'
+    PAUSED = 'paused', 'Paused'
+    FORMER = 'former', 'Former'
+    LOST = 'lost', 'Lost'
+    
+
 class Student(models.Model):
     person = models.ForeignKey(Person, on_delete=models.PROTECT)
     teacher = models.ForeignKey('Teacher', on_delete=models.SET_NULL, null=True, blank=True)
-    status = models.CharField(max_length=20, blank=True, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=StudentStatus.choices,
+        blank=True, 
+        null=True
+    )
     level = models.CharField(max_length=20, blank=True, null=True)
     styles = models.CharField(max_length=30, blank=True, null=True)
     instruments = models.CharField(max_length=50, blank=True, null=True)

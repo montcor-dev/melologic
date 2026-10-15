@@ -173,7 +173,7 @@ class PersonAdmin(admin.ModelAdmin):
 class StudentAdmin(admin.ModelAdmin):
     list_display = ['get_name', 'teacher', 'status', 'level', 'instruments']
     search_fields = ['first_name', 'last_name', 'email']
-    list_filter = [TeacherFilter]
+    list_filter = [TeacherFilter, 'status']
 
     def get_name(self, obj):
         """Return student's full name from related Person"""
