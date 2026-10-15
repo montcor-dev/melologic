@@ -68,15 +68,11 @@ class RoleFilter(admin.SimpleListFilter):
         if self.value() == 'student':
             return queryset.filter(
                 student__isnull=False
-            ).exclude(
-                teacher__isnull=False
             )
 
         elif self.value() == 'teacher':
             return queryset.filter(
                 teacher__isnull=False
-            ).exclude(
-                student__isnull=False
             )
 
         elif self.value() == 'both':
