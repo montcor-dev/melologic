@@ -118,7 +118,7 @@ class TeacherFilter(admin.SimpleListFilter):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'email', 'birth_date']
+    list_display = ['full_name', 'role', 'email', 'phone']
     search_fields = ['first_name', 'last_name', 'email']
     list_filter = [RoleFilter, 'city']
     
@@ -156,6 +156,21 @@ class PersonAdmin(admin.ModelAdmin):
     
     # Sets the column header text
     full_name.short_description = 'Name'
+
+
+    def role(self, obj):
+        """
+        Method to display a person's role (ex. student, teacher) in a column
+
+        obj is the Person instance
+        """
+
+        roles = []
+        if obj.student_set.exists():
+            roles.append('Student')
+        if obj.teacher_set.exists():
+            roles.append('Teacher')
+        return ', '.join(roles) if roles else '---'
 
 
 @admin.register(Student)
