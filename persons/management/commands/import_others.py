@@ -1,7 +1,9 @@
 # persons/management/commands/import_others.py
 
 import csv
+import os
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from persons.models import Person
 
 
