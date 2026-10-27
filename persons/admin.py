@@ -186,6 +186,7 @@ class StudentAdmin(admin.ModelAdmin):
     get_name.short_description = 'Name'
 
     # Makes 'person' field readonly when in 'change' view
+    # This hides the dropdown and adds a link at the bottom to the person's change view
     def get_readonly_fields(self, request, obj=None):
         return ['person'] if obj else []
 
@@ -203,3 +204,8 @@ class TeacherAdmin(admin.ModelAdmin):
 
     # Changes the column header to 'Name'
     get_name.short_description = 'Name'
+
+    # Makes 'person' field readonly when in 'change' view
+    # This hides the dropdown and adds a link at the bottom to the person's change view
+    def get_readonly_fields(self, request, obj=None):
+        return ['person'] if obj else []
