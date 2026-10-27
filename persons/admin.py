@@ -1,6 +1,10 @@
 from django.contrib import admin
 from .models import Person, Student, Teacher
 
+admin.site.site_header = 'Melologic - musique school app'
+admin.site.site_title = 'Melologic - admin'
+admin.site.index_title = ''
+
 class StudentInline(admin.StackedInline):
     model = Student
     extra = 0
@@ -185,10 +189,15 @@ class StudentAdmin(admin.ModelAdmin):
     # Changes the column header to 'Name'
     get_name.short_description = 'Name'
 
+
     # Makes 'person' field readonly when in 'change' view
     # This hides the dropdown and adds a link at the bottom to the person's change view
     def get_readonly_fields(self, request, obj=None):
         return ['person'] if obj else []
+
+    # Hide ADD STUDENT+ button in persons/student view
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Teacher)
@@ -209,3 +218,7 @@ class TeacherAdmin(admin.ModelAdmin):
     # This hides the dropdown and adds a link at the bottom to the person's change view
     def get_readonly_fields(self, request, obj=None):
         return ['person'] if obj else []
+
+    # Hide ADD TEACHER+ button in persons/teacher view
+    def has_add_permission(self, request, obj=None):
+        return False
