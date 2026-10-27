@@ -17,6 +17,13 @@ class Person(models.Model):
     about_me = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)  # Set once, on create
     updated_at = models.DateTimeField(auto_now=True)       # Updated on every save
+    airtable_id = models.CharField(
+    max_length=50,
+    unique=True, # Prevents duplicate Airtable IDs
+    blank=True, # Allow empty (for persons created in Django)
+    null=True,
+    help_text='Airtable record ID for tracking imports'
+)
 
     def __str__(self):
         """ Return name for admin and dropdowns (instead of ID). """
@@ -56,13 +63,6 @@ class Student(models.Model):
     end_date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)  # Set once, on create
     updated_at = models.DateTimeField(auto_now=True)       # Updated on every save
-    airtable_id = models.CharField(
-        max_length=50,
-        unique=True, # Prevents duplicate Airtable IDs
-        blank=True, # Allow empty (for persons created in Django)
-        null=True,
-        help_text='Airtable record ID for tracking imports'
-    )
 
     def __str__(self):
         """ Return student name with status for admin. """
