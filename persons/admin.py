@@ -185,6 +185,10 @@ class StudentAdmin(admin.ModelAdmin):
     # Changes the column header to 'Name'
     get_name.short_description = 'Name'
 
+    # Makes 'person' field readonly when in 'change' view
+    def get_readonly_fields(self, request, obj=None):
+        return ['person'] if obj else []
+
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
