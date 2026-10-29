@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 from .models import Person, Student, Teacher
 
 admin.site.site_header = 'Melologic - musique school app'
@@ -118,7 +120,7 @@ class TeacherFilter(admin.SimpleListFilter):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'role', 'email', 'phone']
+    list_display = ['full_name', 'role', 'email', 'phone', 'add_interaction_link']
     search_fields = ['first_name', 'last_name', 'email']
     list_filter = [RoleFilter, 'city']
     
@@ -171,6 +173,40 @@ class PersonAdmin(admin.ModelAdmin):
         if obj.teacher_set.exists():
             roles.append('Teacher')
         return ', '.join(roles) if roles else '---'
+
+
+    def add_interaction_link(self, obj):
+        """
+        Return a clickable link to create a new interaction for this person.
+        
+        This method is called by Django admin for each row in the list view.
+        The 'obj' parameter is the Person instance for that row.
+        
+        Example output: <a href="/admin/interactions/interaction/add/?person=12">Add Interaction</a>
+        
+        Args:
+            obj: The Person instance for this row
+            
+        Returns:
+            Safe HTML string containing the link
+        """
+        # Step 1: Build the base admin URL for adding an Interaction
+        # reverse() looks up the URL by name (more robust than hardcoding)
+        url = reverse('admin:interactions_interaction_add')
+        
+        # Step 2: Add the person ID as a query parameter
+        # This pre-fills the 'person' field in the new interaction form
+        full_url = f"{url}?person={obj.id}"
+        
+        # Step 3: Build the HTML link safely
+        # format_html() escapes variables automatically (security against XSS attacks)
+        return format_html(
+            '<a href="{}" class="button">Add Interaction</a>',
+            full_url
+        )
+    
+    # Tell Django this method returns safe HTML (don't escape the link)
+    add_interaction_link.short_description = 'Actions'  # Column header text
 
 
 @admin.register(Student)

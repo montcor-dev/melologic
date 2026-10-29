@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+
 class InteractionType(models.TextChoices):
     # Interaction type choices for Interaction model.
 
@@ -12,6 +13,7 @@ class InteractionType(models.TextChoices):
     INPERSON = 'inperson', 'In Person'
     MAIL = 'mail', 'Mail'
     OTHER = 'other', 'Other'
+
 
 class Interaction(models.Model):
     # Track communication/interaction history with persons.
