@@ -13,6 +13,9 @@ class InteractionAdmin(admin.ModelAdmin):
     search_fields = ['person__first_name', 'person__last_name', 'note', 'author__first_name', 'author__last_name']
     date_hierarchy = 'interaction_date'
 
+    autocomplete_fields = ('person', 'author')
+    
+
     def get_changeform_initial_data(self, request):
         """
         Set default values for new Interaction forms.
