@@ -7,7 +7,7 @@ class InteractionType(models.TextChoices):
 
     EMAIL = 'email', 'Email'
     PHONE = 'phone', 'Phone'
-    SMS = 'sms', 'Sms'
+    SMS = 'sms', 'SMS'
     VIDEOCALL = 'video_call', 'Video Call'
     MESSENGER = 'messenger', 'Messenger'
     INPERSON = 'inperson', 'In Person'

@@ -46,3 +46,6 @@ Thumbs.db
 # Import/export data files
 imports/
 *.csv
+
+# notes and comments
+a_lire/

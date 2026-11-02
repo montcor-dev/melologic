@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Interaction
+from .forms import InteractionForm
 
 # Person ID for the default author
 DEFAULT_AUTHOR_ID = 295
@@ -8,6 +9,7 @@ DEFAULT_AUTHOR_ID = 295
 
 @admin.register(Interaction)
 class InteractionAdmin(admin.ModelAdmin):
+    form = InteractionForm
     list_display = ['interaction_date', 'person', 'author', 'note', 'interaction_type', 'follow_up_needed']
     list_filter = ('interaction_type', 'follow_up_needed', 'interaction_date')
     search_fields = ['person__first_name', 'person__last_name', 'note', 'author__first_name', 'author__last_name']
