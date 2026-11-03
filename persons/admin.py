@@ -201,7 +201,7 @@ class PersonAdmin(admin.ModelAdmin):
         # Step 3: Build the HTML link safely
         # format_html() escapes variables automatically (security against XSS attacks)
         return format_html(
-            '<a href="{}" class="button">Add Interaction</a>',
+            '<a href="{}">Add Interaction</a>',
             full_url
         )
     
