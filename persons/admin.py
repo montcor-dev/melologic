@@ -120,9 +120,9 @@ class TeacherFilter(admin.SimpleListFilter):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'role', 'email', 'phone', 'add_interaction_link']
-    search_fields = ['first_name', 'last_name', 'email']
-    list_filter = [RoleFilter, 'city']
+    list_display = ('full_name', 'role', 'email', 'phone', 'add_interaction_link')
+    search_fields = ('first_name', 'last_name', 'email')
+    list_filter = (RoleFilter, 'city')
     
     fieldsets = (
         ('Identity', {
@@ -211,9 +211,9 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ['get_name', 'teacher', 'status', 'level', 'instruments']
-    search_fields = ['first_name', 'last_name', 'email']
-    list_filter = [TeacherFilter, 'status']
+    list_display = ('get_name', 'teacher', 'status', 'level', 'instruments')
+    search_fields = ('first_name', 'last_name', 'email')
+    list_filter = (TeacherFilter, 'status')
 
     def get_name(self, obj):
         """Return student's full name from related Person"""
@@ -238,7 +238,7 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
-    list_display = ['get_name', 'status', 'instruments']
+    list_display = ('get_name', 'status', 'instruments')
 
     def get_name(self, obj):
         """Return student's full name from related Person"""
