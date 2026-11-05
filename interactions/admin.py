@@ -1,5 +1,6 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from .models import Interaction
+from todos.models import Todo, TodoStatus
 from .forms import InteractionForm
 
 # Person ID for the default author
@@ -10,9 +11,9 @@ DEFAULT_AUTHOR_ID = 295
 @admin.register(Interaction)
 class InteractionAdmin(admin.ModelAdmin):
     form = InteractionForm
-    list_display = ('interaction_date', 'person', 'author', 'note', 'interaction_type', 'follow_up_needed')
+    list_display = ('interaction_date', 'person', 'author', 'subject', 'interaction_type', 'follow_up_needed')
     list_filter = ('interaction_type', 'follow_up_needed', 'interaction_date')
-    search_fields = ('person__first_name', 'person__last_name', 'note', 'author__first_name', 'author__last_name')
+    search_fields = ('person__first_name', 'person__last_name', 'subject', 'keywords', 'note', 'author__first_name', 'author__last_name')
     date_hierarchy = 'interaction_date'
 
     autocomplete_fields = ('person', 'author')
@@ -35,3 +36,19 @@ class InteractionAdmin(admin.ModelAdmin):
             'author': request.GET.get('author', DEFAULT_AUTHOR_ID),
             'person': request.GET.get('person', None),  # Optional: pre-fill person too
         }
+
+    
+    def save_model(self, request, obj, form, change):
+        if obj.follow_up_needed and obj.person:
+            # Check if todo already exists
+            todo_exists = Todo.objects.filter(person=obj.person, created_at__date=obj.interaction_date).exists()
+            if not todo_exists:
+                Todo.objects.create(
+                    title=obj.subject,
+                    person=obj.person,
+                    keywords=['from_interaction'],
+                    due_date=obj.follow_up_due_date,
+                )
+                messages.success(request, f"Todo created: {obj.subject}")
+        super().save_model(request, obj, form, change)
+            
