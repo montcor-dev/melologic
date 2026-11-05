@@ -22,15 +22,23 @@ class Interaction(models.Model):
     interaction_date = models.DateTimeField(default=timezone.now)
     person = models.ForeignKey('persons.Person', on_delete=models.PROTECT, related_name='interactions')
     author = models.ForeignKey('persons.Person',on_delete=models.PROTECT, related_name='interactions_author')
-    note = models.TextField(blank=False)
-    follow_up_needed = models.BooleanField(default=False)
-    follow_up_due_date = models.DateField(blank=True, null=True)
     interaction_type = models.CharField(
         max_length=20,
         choices=InteractionType.choices,
         blank=False, 
         null=False
     )
+    subject = models.CharField(max_length=200)
+    note = models.TextField(blank=False)
+    keywords = ArrayField(
+        models.CharField(max_length=50),
+        blank=True,
+        default=list,
+        help_text="Keywords for filtering (e.g. invoicing, urgent, scheduling)"
+    )
+    follow_up_needed = models.BooleanField(default=False)
+    follow_up_due_date = models.DateField(blank=True, null=True)
+
 
     class Meta:
         ordering = ['-interaction_date']
