@@ -122,7 +122,7 @@ class TeacherFilter(admin.SimpleListFilter):
 class PersonAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'role', 'email', 'phone', 'add_interaction_link')
     search_fields = ('first_name', 'last_name', 'email')
-    list_filter = (RoleFilter, 'city')
+    list_filter = (RoleFilter,)
     
     fieldsets = (
         ('Identity', {
