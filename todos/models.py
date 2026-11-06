@@ -17,11 +17,9 @@ class Todo(models.Model):
     Track action items and tasks for the music school.
     
     Todos can be linked to a specific person (e.g., student follow-up)
-    or be general tasks (e.g., 'Order sheet music'). When an Interaction
-    has follow_up_needed=True, a Todo is automatically created.
+    or be general tasks (e.g., 'Order sheet music'). When an Interaction has follow_up_needed=True, a Todo is automatically created.
     
-    Keywords are stored as a PostgreSQL ArrayField for efficient querying
-    and filtering (e.g., show all 'urgent' or 'invoicing' tasks).
+    Keywords are stored as a PostgreSQL ArrayField for efficient querying and filtering (e.g., show all 'urgent' or 'invoicing' tasks).
     """
 
     title = models.CharField(max_length=200)
@@ -52,6 +50,13 @@ class Todo(models.Model):
         help_text="Keywords for filtering (e.g. invoicing, urgent, scheduling)"
     )
     due_date = models.DateField(null=True, blank=True)
+    interaction = models.ForeignKey(
+        'interactions.Interaction',
+        on_delete=models.SET_NULL,  # Don't delete todos if interaction is deleted
+        null=True,
+        blank=True,
+        related_name='todos'  # Allows access to todos from interaction: interactions.todos.all()
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 

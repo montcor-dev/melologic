@@ -39,16 +39,19 @@ class InteractionAdmin(admin.ModelAdmin):
 
     
     def save_model(self, request, obj, form, change):
+        # 1. Save interaction first (gives it an ID)
+        super().save_model(request, obj, form, change)
+
+        # 2. Now obj has an ID, is is safe to create todo
         if obj.follow_up_needed and obj.person:
             # Check if todo already exists
-            todo_exists = Todo.objects.filter(person=obj.person, created_at__date=obj.interaction_date).exists()
+            todo_exists = Todo.objects.filter(interaction=obj).exists()
             if not todo_exists:
                 Todo.objects.create(
                     title=obj.subject,
                     person=obj.person,
+                    interaction=obj,  # Link back to this interaction
                     keywords=['from_interaction'],
                     due_date=obj.follow_up_due_date,
                 )
                 messages.success(request, f"Todo created: {obj.subject}")
-        super().save_model(request, obj, form, change)
-            
