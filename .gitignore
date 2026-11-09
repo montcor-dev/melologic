@@ -1,51 +1,24 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
+# ─── Python ───
+pycache/
 *.py[cod]
 *$py.class
 
-# Virtual environment
+# ─── Virtual environment ───
 .venv/
-venv/
-ENV/
 
-# SQLite database (development)
-db.sqlite3
-*.sqlite3
+# ─── Django/Project ───
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Local settings
-*local_settings.py
-
-# Import/export data files
 imports/
 *.csv
 
-# notes and comments
-a_lire/
+# Local settings (override settings.py for development)
+*local_settings.py
+
+# Documentation (local only)
+docs/
+
+# Media uploads (development)
+media/
+
+# ─── IDE ───
+.vscode/
