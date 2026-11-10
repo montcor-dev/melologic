@@ -19,7 +19,7 @@ class Term(models.Model):
         # clea() is a Django hook method for validation across several fields.
         # It runs in the admin and in ModelForms, but NOT on plain .save()
         if self.start_date and self.end_date and self.end_date < self.start_date:
-            raise ValidationError("The end date cannot be befor the start date.")
+            raise ValidationError("The end date cannot be before the start date.")
 
 
 

@@ -27,3 +27,16 @@ class LessonAdmin (admin.ModelAdmin):
     list_filter = ["status", "teacher", "room"]
     date_hierarchy = "start"
     inlines = [LessonParticipantInline]
+
+
+@admin.register(Term)
+class TermAdmin (admin.ModelAdmin):
+    list_display = ["name", "start_date", "end_date"]
+    list_filter = ["name"]
+    date_hierarchy = "start_date"
+
+
+@admin.register(Room)
+class RoomAdmin (admin.ModelAdmin):
+    list_display = ["name", "is_online"]
+    list_filer = ["name"]
