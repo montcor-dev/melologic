@@ -75,10 +75,12 @@ class Enrollment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-term__start_date", "student__id"]
+        ordering = ["-term__start_date", "student__person__last_name", "student__person__first_name"]
 
     def __str__(self):
-        return f"{self.student} / {self.teacher} / {self.term}"
+        student = self.student.person
+        teacher = self.teacher.person
+        return f"{student.last_name} {student.first_name}/ {teacher.last_name} {teacher.first_name} / {self.term}"
 
 
 
@@ -114,7 +116,7 @@ class Lesson(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.start:%Y-%m-%d %H:%M} ({self.teacher})"
+        return f"{self.start:%Y-%m-%d %H:%M} ({self.teacher.person.last_name})"
 
     @property
     def is_group(self):
@@ -154,7 +156,8 @@ class LessonParticipant(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.student} @ {self.lesson}"
+        person = self.student.person
+        return f"{person.last_name} {person.first_name} @ {self.lesson}"
 
     def clean(self):
         # The participant's student must be the student of the enrollment.
