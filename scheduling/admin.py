@@ -3,7 +3,7 @@ from django.contrib import admin, messages
 from .models import Term, Room, Enrollment, Lesson, LessonParticipant
 from .services import approve_enrollment
 
-@admin register(Enrollment):
+@admin.register(Enrollment)
 class EnrollmentAdmin (admin.ModelAdmin):
     list_display = ["student", "teacher", "term", "frequency", "lessons_agreed", "status"]
     list_filter = ["status", "term", "teacher"]
@@ -21,7 +21,7 @@ class LessonParticipantInline(admin.TabularInline):
     extra = 1
 
 
-@admin register(Lesson):
+@admin.register(Lesson)
 class LessonAdmin (admin.ModelAdmin):
     list_display = ["start", "end", "teacher", "room", "status"]
     list_filter = ["status", "teacher", "room"]
