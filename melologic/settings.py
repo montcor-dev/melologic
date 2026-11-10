@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'persons',
     'interactions',
     'todos',
+    'scheduling',
 ]
 
 MIDDLEWARE = [
