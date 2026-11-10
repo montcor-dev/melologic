@@ -96,8 +96,8 @@ class Lesson(models.Model):
         related_name="lessons"
     )
     room = models.ForeignKey(Room, on_delete=models.PROTECT, related_name="lessons")
-    start = models.DateField()
-    end = models.DateField()
+    start = models.DateTimeField()
+    end = models.DateTimeField()
     status = models.CharField(
         max_length=15, choices=Status.choices, default=Status.PROVISIONAL
     )
