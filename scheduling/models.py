@@ -46,10 +46,10 @@ class Enrollment(models.Model):
         MIN_90 = 90, "90 minutes"
 
     class Status(models.TextChoices):
-    DRAFT = "draft", "Draft (being planned)"
-    PROPOSED = "proposed", "Proposed (sent to student)"
-    ACTIVE = "active", "Active (approved)"
-    ENDED = "ended", "Ended"
+        DRAFT = "draft", "Draft (being planned)"
+        PROPOSED = "proposed", "Proposed (sent to student)"
+        ACTIVE = "active", "Active (approved)"
+        ENDED = "ended", "Ended"
 
 
     # on_delete=models.PROTECT: impossible to delete a student who still has enrollments (safer than CASCADE).
@@ -92,7 +92,7 @@ class Lesson(models.Model):
         CANCELLED = "cancelled", "Cancelled"
 
     teacher = models.ForeignKey(
-        "persons.Teacher", on delete=models.PROTECT,
+        "persons.Teacher", on_delete=models.PROTECT,
         related_name="lessons"
     )
     room = models.ForeignKey(Room, on_delete=models.PROTECT, related_name="lessons")
@@ -108,7 +108,7 @@ class Lesson(models.Model):
         constraints = [
             # Data integrity is the one thing we enforce at DB level.
             models.CheckConstraint(
-                condition=models.Q(end_gt=models.F("start")),
+                condition=models.Q(end__gt=models.F("start")),
                 name="lesson_end_after_start",
             ),
         ]
@@ -133,13 +133,13 @@ class LessonParticipant(models.Model):
         NO_SHOW = "no_show", "No-show"
 
     lesson = models.ForeignKey(
-        Lesson, on_delete=CASCADE, related_name="participants"
+        Lesson, on_delete=models.CASCADE, related_name="participants"
     )
     student = models.ForeignKey(
         "persons.Student", on_delete=models.PROTECT, related_name="lesson_participants"
     )
     enrollment = models.ForeignKey(
-        Enrollment, on_delete=PROTECT, related_name="participants"
+        Enrollment, on_delete=models.PROTECT, related_name="participants"
     )
     attendance_status = models.CharField(
         max_length=20, choices=Attendance.choices, default=Attendance.EXPECTED
@@ -156,7 +156,7 @@ class LessonParticipant(models.Model):
     def __str__(self):
         return f"{self.student} @ {self.lesson}"
 
-    def clean(self)
+    def clean(self):
         # The participant's student must be the student of the enrollment.
         if self.enrollment_id and self.student_id:
             if self.enrollment.student_id != self.student_id:
