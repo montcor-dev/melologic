@@ -164,3 +164,26 @@ class LessonParticipant(models.Model):
         if self.enrollment_id and self.student_id:
             if self.enrollment.student_id != self.student_id:
                 raise ValidationError("The enrollment belongs to a different student.")
+
+
+
+class LedgerEntry(models.Model):
+
+    class REASONS(models.TextChoices):
+        GRANT = "grant", "Grant"
+        MAKEUP = "makeup", "Make Up"
+        CANCEL = "cancel", "Lesson Cancelled"
+        MANUAL = "manual", "Manual Correction"
+
+    enrollment = models.ForeignKey(
+        Enrollment, on_delete=models.PROTECT, related_name="minutes"
+    )
+    participant = models.ForeignKey(
+        LessonParticipant, on_delete=models.PROTECT, related_name="minutes", null=True, blank=True
+    )
+    minutes = models.IntegerField()
+    reason = models.CharField(
+        max_length=10, choices=Reasons.choices
+    )
+    note = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

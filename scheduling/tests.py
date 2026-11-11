@@ -10,6 +10,7 @@ from scheduling.services import approve_enrollment
 
 
 class ApproveEnrollmentTests(TestCase):
+
     @classmethod
     def setUpTestData(cls):
         # Runs once for the whole class. Creates the shared objects.
@@ -25,6 +26,8 @@ class ApproveEnrollmentTests(TestCase):
         cls.room = Room.objects.create(name="Salle 1")
         cls.user = get_user_model().objects.create_user("admin", password="x")
 
+
+    # Helper method that creates an Enrollment instance for the tests
     def make_enrollment_with_lessons(self, count=2):
         enrollment = Enrollment.objects.create(
             student=self.student, teacher=self.teacher, term=self.term, frequency=Enrollment.Frequency.WEEKLY,
@@ -44,13 +47,12 @@ class ApproveEnrollmentTests(TestCase):
             )
         return enrollment
 
+    # Test methods
     def test_approval_activates_enrollment_and_confirms_lessons(self):
-        enrollment = self.make_enrollment_with_lessons(count=2)
-
-        approve_enrollment(enrollment, actor=self.user)
-
-        enrollment.refresh_from_db()  # reload from the database
-        self.assertEqual(enrollment.status, enrollment.Status.ACTIVE)
+        enrollment = self.make_enrollment_with_lessons(count=2)  # arrange
+        approve_enrollment(enrollment, actor=self.user)  # act
+        enrollment.refresh_from_db()  # reload (from the database)
+        self.assertEqual(enrollment.status, Enrollment.Status.ACTIVE)  # assert
         self.assertIsNotNone(enrollment.approved_at)
         self.assertEqual(
             Lesson.objects.filter(status=Lesson.Status.SCHEDULED).count(), 2
@@ -65,3 +67,10 @@ class ApproveEnrollmentTests(TestCase):
         approve_enrollment(enrollment, actor=self.user)
 
         self.assertEqual(Lesson.objects.get().status, Lesson.Status.CANCELLED)
+
+    def test_enrollment_without_lessons_activates(self):
+        enrollment = self.make_enrollment_with_lessons(count=0)  # arrange
+        approve_enrollment(enrollment, actor=self.user)  # act
+        enrollment.refresh_from_db()  # reload from db
+        self.assertEqual(enrollment.status, enrollment.Status.ACTIVE)  #assert
+    
