@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 
-from .models import Term, Room, Enrollment, Lesson, LessonParticipant
+from .models import Term, Room, Enrollment, Lesson, LessonParticipant, LedgerEntry
 from .services import approve_enrollment
 
 @admin.register(Enrollment)
@@ -45,3 +45,12 @@ class TermAdmin (admin.ModelAdmin):
 class RoomAdmin (admin.ModelAdmin):
     list_display = ["name", "is_online"]
     list_filer = ["name"]
+
+
+@admin.register(LedgerEntry)
+class LedgerEntryAdmin(admin.ModelAdmin):
+    list_display = ("enrollment", "minutes", "reason", "created_at")
+    list_filter = ("reason", "enrollment__term")
+    list_select_related = ("enrollment__student__person", "enrollment__teacher__person", "enrollment__term")
+    readonly_fields = ("created_at",)
+    search_fields = ('enrollment__student__person__first_name', 'enrollment__student__person__last_name', 'note')
