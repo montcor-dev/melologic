@@ -3,9 +3,10 @@ from datetime import date, timedelta
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
+from django.db import IntegrityError, transaction
 
 from persons.models import Person, Student, Teacher
-from scheduling.models import Enrollment, Lesson, LessonParticipant, Room, Term
+from scheduling.models import Enrollment, Lesson, LessonParticipant, Room, Term, LedgerEntry
 from scheduling.services import approve_enrollment
 
 
@@ -73,4 +74,51 @@ class ApproveEnrollmentTests(TestCase):
         approve_enrollment(enrollment, actor=self.user)  # act
         enrollment.refresh_from_db()  # reload from db
         self.assertEqual(enrollment.status, enrollment.Status.ACTIVE)  #assert
+
+
+
+class LedgerEntryTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.student = Student.objects.create(
+            person=Person.objects.create(first_name="Alain", last_name="Delon") 
+        )
+        cls.teacher = Teacher.objects.create(
+            person=Person.objects.create(first_name="Patty", last_name="Smith")
+        )
+        cls.term = Term.objects.create(name="S26|01", start_date=date(2026, 9, 1), end_date=date(2027, 1, 30)
+        )
+        cls.enrollment = Enrollment.objects.create(student=cls.student, teacher=cls.teacher, term=cls.term, frequency=Enrollment.Frequency.WEEKLY, lesson_duration=Enrollment.Duration.MIN_45, lessons_agreed=9)
+
+
+    # Test methods
+    def test_cancel_reason_with_empty_note_is_allowed(self):
+        LedgerEntry.objects.create(
+            enrollment=self.enrollment,
+            minutes=-45,
+            reason=LedgerEntry.Reason.CANCEL,
+            note="",
+        )
+        self.assertEqual(LedgerEntry.objects.count(), 1) 
+
     
+    def test_manual_reason_with_note_is_allowed(self):
+        LedgerEntry.objects.create(
+            enrollment=self.enrollment,
+            minutes=45,
+            reason=LedgerEntry.Reason.MANUAL,
+            note="Correction for vacation week.",
+        )
+        self.assertEqual(LedgerEntry.objects.count(), 1) 
+
+
+    def test_manual_reason_with_empty_note_raises_error(self):        
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                LedgerEntry.objects.create(
+                    enrollment=self.enrollment,
+                    minutes=45,
+                    reason=LedgerEntry.Reason.MANUAL,
+                    note="",
+                )
