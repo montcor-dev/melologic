@@ -108,7 +108,7 @@ class Lesson(models.Model):
         ordering = ["start"]
         indexes = [models.Index(fields=["start"])]  # The calendar feed filters by date range
         constraints = [
-            # Data integrity is the one thing we enforce at DB level.
+            # Data integrity is enforced at DB level.
             models.CheckConstraint(
                 condition=models.Q(end__gt=models.F("start")),
                 name="lesson_end_after_start",
@@ -160,7 +160,7 @@ class LessonParticipant(models.Model):
         return f"{person.last_name} {person.first_name} @ {self.lesson}"
 
     def clean(self):
-        # The participant's student must be the student of the enrollment.
+        # The participant's student must be the same as in the enrollment.
         if self.enrollment_id and self.student_id:
             if self.enrollment.student_id != self.student_id:
                 raise ValidationError("The enrollment belongs to a different student.")
@@ -169,21 +169,35 @@ class LessonParticipant(models.Model):
 
 class LedgerEntry(models.Model):
 
-    class REASONS(models.TextChoices):
-        GRANT = "grant", "Grant"
-        MAKEUP = "makeup", "Make Up"
-        CANCEL = "cancel", "Lesson Cancelled"
-        MANUAL = "manual", "Manual Correction"
+    class Reason(models.TextChoices):
+        PURCHASE = "purchase", "Lessons purchased"
+        LESSON_USED = "lesson_used", "Lesson used"
+        CANCEL = "cancel", "Lesson cancelled"
+        MAKEUP = "makeup", "Make-up accepted"
+        MANUAL = "manual", "Manual adjustment"
 
     enrollment = models.ForeignKey(
-        Enrollment, on_delete=models.PROTECT, related_name="minutes"
+        Enrollment, on_delete=models.PROTECT, related_name="ledger"
     )
     participant = models.ForeignKey(
-        LessonParticipant, on_delete=models.PROTECT, related_name="minutes", null=True, blank=True
+        LessonParticipant, on_delete=models.PROTECT, related_name="ledger", null=True, blank=True
     )
     minutes = models.IntegerField()
     reason = models.CharField(
-        max_length=10, choices=Reasons.choices
+        max_length=20, choices=Reason.choices
     )
-    note = models.TextField()
+    note = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+        constraints = [
+            # "manual" = value of Reason.MANUAL
+            models.CheckConstraint(
+                condition=~models.Q(reason="manual") | ~models.Q(note=""),
+                name="reason_not_manual_or_note_not_empty",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.minutes:+d} min ({self.get_reason_display()})"
