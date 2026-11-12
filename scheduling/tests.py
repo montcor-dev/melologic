@@ -122,3 +122,86 @@ class LedgerEntryTest(TestCase):
                     reason=LedgerEntry.Reason.MANUAL,
                     note="",
                 )
+
+
+
+
+class BalanceMinTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.student = Student.objects.create(
+            person=Person.objects.create(first_name="Alain", last_name="Delon") 
+        )
+        cls.teacher = Teacher.objects.create(
+            person=Person.objects.create(first_name="Patty", last_name="Smith")
+        )
+        cls.term = Term.objects.create(name="S26|01", start_date=date(2026, 9, 1), end_date=date(2027, 1, 30)
+        )
+        cls.enrollment = Enrollment.objects.create(student=cls.student, teacher=cls.teacher, term=cls.term, frequency=Enrollment.Frequency.WEEKLY, lesson_duration=Enrollment.Duration.MIN_45, lessons_agreed=9)
+
+    # Test methods
+    def test_balance_of_new_enrollment_is_zero(self):
+        self.assertEqual(self.enrollment.balance_min(), 0)
+
+    
+    def test_total_of_several_entries_is_correct(self):
+        LedgerEntry.objects.create(
+            enrollment=self.enrollment,
+            minutes=810,
+            reason=LedgerEntry.Reason.PURCHASE,
+            note="",
+        )
+        LedgerEntry.objects.create(
+            enrollment=self.enrollment,
+            minutes=-225,
+            reason=LedgerEntry.Reason.LESSON_USED,
+            note="",
+        )
+        LedgerEntry.objects.create(
+            enrollment=self.enrollment,
+            minutes=-45,
+            reason=LedgerEntry.Reason.CANCEL,
+            note="",
+        )
+        LedgerEntry.objects.create(
+            enrollment=self.enrollment,
+            minutes=45,
+            reason=LedgerEntry.Reason.MAKEUP,
+            note="",
+        )
+        LedgerEntry.objects.create(
+            enrollment=self.enrollment,
+            minutes=-45,
+            reason=LedgerEntry.Reason.CANCEL,
+            note="",
+        )
+
+        self.assertEqual(self.enrollment.balance_min(), 540)
+
+
+    def test_other_enrollments_dont_count(self):
+        LedgerEntry.objects.create(
+            enrollment=self.enrollment,
+            minutes=810,
+            reason=LedgerEntry.Reason.PURCHASE,
+            note="",
+        )
+        LedgerEntry.objects.create(
+            enrollment=self.enrollment,
+            minutes=-45,
+            reason=LedgerEntry.Reason.CANCEL,
+            note="",
+        )
+
+        new_enrollment = Enrollment.objects.create(student=self.student, teacher=self.teacher, term=self.term, frequency=Enrollment.Frequency.WEEKLY, lesson_duration=Enrollment.Duration.MIN_45, lessons_agreed=9)
+
+        LedgerEntry.objects.create(
+            enrollment=new_enrollment,
+            minutes=45,
+            reason=LedgerEntry.Reason.MANUAL,
+            note="trial lesson",
+        )
+
+        self.assertEqual(self.enrollment.balance_min(), 765)
+        self.assertEqual(new_enrollment.balance_min(), 45)
