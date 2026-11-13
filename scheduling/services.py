@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from .models import Enrollment, Lesson, LedgerEntry
 
@@ -16,8 +17,7 @@ def approve_enrollment(enrollment, actor):  # It takes actor already, although n
         status=Lesson.Status.PROVISIONAL,
     ).update(status=Lesson.Status.SCHEDULED)
 
-
-    # add the ledger grant for the chosen enrollment
+    # adds the ledger grant for the chosen enrollment
     ledger_grant = enrollment.lesson_duration * enrollment.lessons_agreed
     LedgerEntry.objects.create(
             enrollment=enrollment,

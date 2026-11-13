@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 from django.db import IntegrityError, transaction
+from django.core.exceptions import ValidationError
 
 from persons.models import Person, Student, Teacher
 from scheduling.models import Enrollment, Lesson, LessonParticipant, Room, Term, LedgerEntry
@@ -48,6 +49,7 @@ class ApproveEnrollmentTests(TestCase):
             )
         return enrollment
 
+
     # Test methods
     def test_approval_activates_enrollment_and_confirms_lessons(self):
         enrollment = self.make_enrollment_with_lessons(count=2)  # arrange
@@ -81,6 +83,15 @@ class ApproveEnrollmentTests(TestCase):
         approve_enrollment(enrollment, actor=self.user)  # act
         self.assertEqual(enrollment.balance_min(), expected)  # assert
 
+    def test_approving_twice_the_same_enrollment_is_refused(self):        
+        enrollment = self.make_enrollment_with_lessons(count=2)  # arrange
+        approve_enrollment(enrollment, actor=self.user)  # act (1st approval works)
+
+        with self.assertRaises(ValidationError):  
+            approve_enrollment(enrollment, actor=self.user)  # 2nd is refused
+
+        self.assertEqual(enrollment.balance_min(), 90)  # assert
+
 
 
 class LedgerEntryTest(TestCase):
@@ -107,7 +118,6 @@ class LedgerEntryTest(TestCase):
             note="",
         )
         self.assertEqual(LedgerEntry.objects.count(), 1) 
-
     
     def test_manual_reason_with_note_is_allowed(self):
         LedgerEntry.objects.create(
@@ -117,7 +127,6 @@ class LedgerEntryTest(TestCase):
             note="Correction for vacation week.",
         )
         self.assertEqual(LedgerEntry.objects.count(), 1) 
-
 
     def test_manual_reason_with_empty_note_raises_error(self):        
         with self.assertRaises(IntegrityError):
@@ -146,10 +155,10 @@ class BalanceMinTest(TestCase):
         )
         cls.enrollment = Enrollment.objects.create(student=cls.student, teacher=cls.teacher, term=cls.term, frequency=Enrollment.Frequency.WEEKLY, lesson_duration=Enrollment.Duration.MIN_45, lessons_agreed=9)
 
+
     # Test methods
     def test_balance_of_new_enrollment_is_zero(self):
         self.assertEqual(self.enrollment.balance_min(), 0)
-
     
     def test_total_of_several_entries_is_correct(self):
         LedgerEntry.objects.create(
@@ -184,7 +193,6 @@ class BalanceMinTest(TestCase):
         )
 
         self.assertEqual(self.enrollment.balance_min(), 540)
-
 
     def test_other_enrollments_dont_count(self):
         LedgerEntry.objects.create(
