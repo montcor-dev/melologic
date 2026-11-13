@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Sum
 
 
 
@@ -81,6 +82,12 @@ class Enrollment(models.Model):
         student = self.student.person
         teacher = self.teacher.person
         return f"{student.last_name} {student.first_name}/ {teacher.last_name} {teacher.first_name} / {self.term}"
+
+
+    # method to calculate the balance = sum of an enrollment's minutes
+    def balance_min(self):
+        result = self.ledger.aggregate(balance=Sum("minutes"))        
+        return result["balance"] or 0  # “give me the balance, and if there isn’t one, give me 0”
 
 
 
