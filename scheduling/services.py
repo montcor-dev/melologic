@@ -8,6 +8,10 @@ from .models import Enrollment, Lesson, LedgerEntry
 @transaction.atomic  # All changes below succed together or not at all.
 def approve_enrollment(enrollment, actor):  # It takes actor already, although nothing uses it yet.
     """The student accepted the proposal: activate the enrollment and confirm its lessons."""
+    if enrollment.status in (Enrollment.Status.ACTIVE, Enrollment.Status.ENDED):
+        person = enrollment.student.person
+        raise ValidationError(f"The enrollment of {person.first_name} {person.last_name} for {enrollment.term} has already been approved!")
+    
     enrollment.status = Enrollment.Status.ACTIVE
     enrollment.approved_at = timezone.now()
     enrollment.save()
