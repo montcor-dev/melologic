@@ -75,6 +75,12 @@ class ApproveEnrollmentTests(TestCase):
         enrollment.refresh_from_db()  # reload from db
         self.assertEqual(enrollment.status, enrollment.Status.ACTIVE)  #assert
 
+    def test_approval_adds_correct_minutes_to_ledger(self):
+        enrollment = self.make_enrollment_with_lessons(count=9)  # arrange
+        expected = enrollment.lessons_agreed * enrollment.lesson_duration
+        approve_enrollment(enrollment, actor=self.user)  # act
+        self.assertEqual(enrollment.balance_min(), expected)  # assert
+
 
 
 class LedgerEntryTest(TestCase):

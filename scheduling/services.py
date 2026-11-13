@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 
-from .models import Enrollment, Lesson
+from .models import Enrollment, Lesson, LedgerEntry
 
 
 @transaction.atomic  # All changes below succed together or not at all.
@@ -16,6 +16,13 @@ def approve_enrollment(enrollment, actor):  # It takes actor already, although n
         status=Lesson.Status.PROVISIONAL,
     ).update(status=Lesson.Status.SCHEDULED)
 
-    # Phase 1b: write the ledger grant here (lessons_agreed * lesson_duration_minutes)
+
+    # add the ledger grant for the chosen enrollment
+    ledger_grant = enrollment.lesson_duration * enrollment.lessons_agreed
+    LedgerEntry.objects.create(
+            enrollment=enrollment,
+            minutes=ledger_grant,
+            reason=LedgerEntry.Reason.PURCHASE,
+    )
 
     return enrollment
