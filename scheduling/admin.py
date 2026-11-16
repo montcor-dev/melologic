@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
 
 from .models import Term, Room, Enrollment, Lesson, LessonParticipant, LedgerEntry
 from .services import approve_enrollment
@@ -16,9 +17,15 @@ class EnrollmentAdmin (admin.ModelAdmin):
     
     @admin.action(description="Approve selected enrollments (student accepted)")
     def approve_selected(self, request, queryset):
+        approved = 0
         for enrollment in queryset:
-            approve_enrollment(enrollment, actor=request.user)
-        self.message_user(request, f"{queryset.count()} enrollment(s) approved.", messages.SUCCESS)
+            try:
+                approve_enrollment(enrollment, actor=request.user)
+                approved += 1
+            except ValidationError as e:
+                self.message_user(request, " ".join(e.messages), messages.ERROR)
+        if approved:
+            self.message_user(request, f"{approved} enrollment(s) approved.", messages.SUCCESS)
 
 class LessonParticipantInline(admin.TabularInline):
     # Let's edit participants on the Lesson page itself.

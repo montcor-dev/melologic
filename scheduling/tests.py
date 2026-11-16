@@ -92,6 +92,16 @@ class ApproveEnrollmentTests(TestCase):
 
         self.assertEqual(enrollment.balance_min(), 90)  # assert
 
+    def test_approving_an_ended_enrollment_is_refused(self):        
+        enrollment = self.make_enrollment_with_lessons(count=1)  # arrange
+        enrollment.status = Enrollment.Status.ENDED
+        enrollment.save()
+
+        with self.assertRaises(ValidationError):  
+            approve_enrollment(enrollment, actor=self.user)  # act
+
+        self.assertEqual(enrollment.balance_min(), 0)  # assert
+
 
 
 class LedgerEntryTest(TestCase):
