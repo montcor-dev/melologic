@@ -171,6 +171,10 @@ class LessonParticipant(models.Model):
             models.UniqueConstraint(
                 fields=["lesson", "student"], name="unique_student_per_lesson"
             ),
+            models.CheckConstraint(
+                condition=~models.Q(makeup_decision="not_accepted") | ~models.Q(decision_note=""),
+                name="makeup_not_accepted_needs_note",
+            ),
         ]
 
     def __str__(self):
