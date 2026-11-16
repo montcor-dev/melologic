@@ -141,6 +141,11 @@ class LessonParticipant(models.Model):
         ABSENT_TEACHER = "absent_teacher", "Absent (teacher)"
         NO_SHOW = "no_show", "No-show"
 
+    class MakeUpDecision(models.TextChoices):
+        PENDING = "pending", "Pending (not decided yet)"
+        ACCEPTED = "accepted", "Make-up accepted"
+        NOT_ACCEPTED = "not_accepted", "Make-up NOT accepted"
+
     lesson = models.ForeignKey(
         Lesson, on_delete=models.CASCADE, related_name="participants"
     )
@@ -153,6 +158,12 @@ class LessonParticipant(models.Model):
     attendance_status = models.CharField(
         max_length=20, choices=Attendance.choices, default=Attendance.EXPECTED
     )
+    makeup_decision = models.CharField(
+        max_length=15, choices=MakeUpDecision.choices, default=MakeUpDecision.PENDING
+    )
+    decision_note = models.TextField(blank=True)
+    makeup_for = models.ForeignKey("self", on_delete=models.PROTECT, null=True, blank=True, related_name="makeups")
+
 
     class Meta:
         constraints = [
