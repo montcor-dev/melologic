@@ -16,6 +16,7 @@ imports/
 
 # Documentation (local only)
 docs/
+.todo.md
 
 # Media uploads (development)
 media/
