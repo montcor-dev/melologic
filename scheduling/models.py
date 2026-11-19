@@ -142,6 +142,7 @@ class LessonParticipant(models.Model):
         NO_SHOW = "no_show", "No-show"
 
     class MakeUpDecision(models.TextChoices):
+        NONE = "none", "Not applicable"
         PENDING = "pending", "Pending (not decided yet)"
         ACCEPTED = "accepted", "Make-up accepted"
         NOT_ACCEPTED = "not_accepted", "Make-up NOT accepted"
@@ -159,7 +160,7 @@ class LessonParticipant(models.Model):
         max_length=20, choices=Attendance.choices, default=Attendance.EXPECTED
     )
     makeup_decision = models.CharField(
-        max_length=15, choices=MakeUpDecision.choices, default=MakeUpDecision.PENDING
+        max_length=15, choices=MakeUpDecision.choices, default=MakeUpDecision.NONE
     )
     decision_note = models.TextField(blank=True)
     makeup_for = models.ForeignKey("self", on_delete=models.PROTECT, null=True, blank=True, related_name="makeups")
