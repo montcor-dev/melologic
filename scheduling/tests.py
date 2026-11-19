@@ -229,3 +229,81 @@ class BalanceMinTest(TestCase):
 
         self.assertEqual(self.enrollment.balance_min(), 765)
         self.assertEqual(new_enrollment.balance_min(), 45)
+
+
+
+
+class MakeUpLessonsTests(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Runs once for the whole class. Creates the shared objects.
+        cls.student = Student.objects.create(
+            person=Person.objects.create(first_name="Anna", last_name="Meier")
+        )
+        cls.teacher = Teacher.objects.create(
+            person=Person.objects.create(first_name="Paul", last_name="Berger")
+        )
+        cls.term = Term.objects.create(
+            name="S26|02", start_date=date(2026, 8, 24), end_date=date(2027, 1, 30)
+        )
+        cls.room = Room.objects.create(name="Salle 1")
+        cls.user = get_user_model().objects.create_user("admin", password="x")
+        cls.enrollment = Enrollment.objects.create(
+            student=cls.student, teacher=cls.teacher, term=cls.term, frequency=Enrollment.Frequency.WEEKLY,
+            lesson_duration=45, lessons_agreed=2,
+            status=Enrollment.Status.ACTIVE,
+        )
+
+    # Helper method that creates a participant for the tests
+    def make_participant(self, days=7, **extra):
+        start = timezone.now() + timedelta(days=days)
+        lesson = Lesson.objects.create(
+            teacher=self.teacher, room=self.room,
+            start=start, end=start + timedelta(minutes=45),
+            status=Lesson.Status.SCHEDULED,
+        )
+        return LessonParticipant.objects.create(
+            lesson=lesson, student=self.student, enrollment=self.enrollment, **extra
+        )
+
+    # Test methods
+    def test_not_accepted_with_note_is_allowed(self):
+        self.make_participant(
+            makeup_decision=LessonParticipant.MakeUpDecision.NOT_ACCEPTED, decision_note="Cancelled too late",
+        )
+        self.assertEqual(LessonParticipant.objects.count(), 1)
+
+    def test_accepted_without_note_is_allowed(self):
+        self.make_participant(
+            makeup_decision=LessonParticipant.MakeUpDecision.ACCEPTED,
+            decision_note="",
+        )
+        self.assertEqual(LessonParticipant.objects.count(), 1)
+
+    def test_default_is_none(self):
+        p = self.make_participant()
+        p.refresh_from_db()
+        self.assertEqual(p.makeup_decision, LessonParticipant.MakeUpDecision.NONE)
+    
+    def test_not_accepted_without_note_not_allowed(self):
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                self.make_participant(
+                makeup_decision=LessonParticipant.MakeUpDecision.NOT_ACCEPTED,
+                )         
+        self.assertEqual(LessonParticipant.objects.count(), 0)
+
+    def test_absence_has_makeup(self):
+        absence = self.make_participant(days=7, attendance_status=LessonParticipant.Attendance.ABSENT_STUDENT, makeup_decision=LessonParticipant.MakeUpDecision.ACCEPTED,
+        )
+        makeup = self.make_participant(days=14, makeup_for=absence)
+        self.assertIn(makeup, absence.makeups.all())   # the absence knows its make-up     
+        self.assertEqual(makeup.makeup_for, absence)  # the make-up knows its absence
+
+    def test_two_makeups_for_one_absence_allowed(self):
+        absence = self.make_participant(days=7, attendance_status=LessonParticipant.Attendance.ABSENT_STUDENT, makeup_decision=LessonParticipant.MakeUpDecision.ACCEPTED,
+        )
+        self.make_participant(days=14, makeup_for=absence)
+        self.make_participant(days=21, makeup_for=absence)
+        self.assertEqual(absence.makeups.count(), 2)
