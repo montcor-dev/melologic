@@ -8,7 +8,7 @@ from .services import approve_enrollment
 class EnrollmentAdmin (admin.ModelAdmin):
     list_display = ["student_name", "teacher", "term", "frequency", "lessons_agreed", "status"]
     list_filter = ["status", "term", "teacher"]
-    list_selected_related = ["student__person", "teacher__pernson", "term"]
+    list_selected_related = ["student__person", "teacher__person", "term"]
     actions = ["approve_selected"]
 
     @admin.display(description="Student", ordering="student__person__last_name")
@@ -35,10 +35,22 @@ class LessonParticipantInline(admin.TabularInline):
 
 @admin.register(Lesson)
 class LessonAdmin (admin.ModelAdmin):
-    list_display = ["start", "end", "teacher", "room", "status"]
-    list_filter = ["status", "teacher", "room"]
+    list_display = ["start", "end", "students", "teacher", "room", "status"]
+    list_filter = ["status", "teacher", "room", "participants__student__person__last_name"]
+    search_fields = ["participants__student__person__last_name", "participants__student__person__first_name"]
     date_hierarchy = "start"
     inlines = [LessonParticipantInline]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.prefetch_related("participants__student__person", "teacher__person")
+
+    @admin.display(description="Student(s)")
+    def students(self, obj):
+        return ", ".join(
+            f"{p.student.person.last_name} {p.student.person.first_name}"
+            for p in obj.participants.all()
+        )
 
 
 @admin.register(Term)
