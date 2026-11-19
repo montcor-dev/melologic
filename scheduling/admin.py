@@ -27,7 +27,7 @@ class EnrollmentAdmin (admin.ModelAdmin):
         if approved:
             self.message_user(request, f"{approved} enrollment(s) approved.", messages.SUCCESS)
 
-class LessonParticipantInline(admin.TabularInline):
+class LessonParticipantInline(admin.StackedInline):
     # Let's edit participants on the Lesson page itself.
     model = LessonParticipant
     extra = 1
