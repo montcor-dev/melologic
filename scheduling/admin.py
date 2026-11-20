@@ -30,6 +30,8 @@ class EnrollmentAdmin (admin.ModelAdmin):
 class LessonParticipantInline(admin.StackedInline):
     # Let's edit participants on the Lesson page itself.
     model = LessonParticipant
+    # the makeup fields will be managed with an admin action
+    readonly_fields = ('makeup_decision', 'decision_note', 'makeup_for')
     extra = 1
 
 
